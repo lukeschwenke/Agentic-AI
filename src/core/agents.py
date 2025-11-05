@@ -1,60 +1,65 @@
-from core_setup import State
-from core_setup import llm_with_tools
+from src.core.define_state import State
+from src.core.define_state import llm, llm_with_tools
 from langchain.prompts import PromptTemplate
-from langgraph.graph import StateGraph, END
+import json
 
-
-
-def treasury_yield_agent(state: State) -> dict:
-    """Agent gets the latest news articles and summarizes how mortgage rates are at the moment.
-    It will also review the 10 year treasury yield rate and see if it's good."""
-    prompt = PromptTemplate(input_variables=["monthly_payment", "interest_rate"],
-                            template="""You are a mortgage lending and refinancing expert. You need to understand
-                            the latest market conditions to best advise the user based on their data.
-
-                            The user data is as follows:
-                            Current Monthly Payment: {monthly_payment}
-                            Current Interest Rate: {interest_rate}
-
-                            You should review the current 10 Year Treasury Yield rate by 
-                            calling the `get_treasury_10yr_yield_for_agent` tool to get the current 10-year Treasury yield.
-                            An ideal time to refinance is when this value is below 4.0; check to 
-                            see if that is currently true. Inform the user of this value and provide a detailed
-                            explanation for how this could influence their rate.""")
-    
-    final_prompt = prompt.invoke({
-        "monthly_payment": state["monthly_payment"],
-        "interest_rate": state["interest_rate"]
-        })
-
-    response = llm_with_tools.invoke(final_prompt)
-
-    # # Check if the response to the LLM included using the tool.
-    # if response.tool_calls:
-    #     state['treasury_yield'] = response.output
-    # else:
-    #     state['treasury_yield'] = "No treasury yield captured."
-
-    # if response.tool_calls:
-    #     state['treasury_yield'] = response.output
-
-    # return state
-
+# Agent #1
 def market_expert_agent(state: State) -> dict:
     prompt = PromptTemplate(input_variables=["user_rate"],
                             template="""
-                            You should also summarize some recent articles to get an average mortgage interest rate
-                            people are seeing right now by calling the get_rates_search_tool. ONLY extract the 
-                            average mortgage interest rate value (e.g., 6.55).
-                            
-                            Once you have the rate, compare this to the user's rate of {user_rate}. 
-                            If the average market rate is 1.0 percent lower or more then let the user know this 
-                            may be a good time to refinance. If it does not meet
-                            that requirement then suggest they wait longer and to keep watching the 10 year 
-                            treasury yield.""")
+                            You are a mortgage market expert. You should summarize some recent articles to get 
+                            an average mortgage interest rate people are seeing right now by 
+                            calling the `get_rates_search_tool`. When you finish, return ONLY valid JSON 
+                            of the form: {"market_rate": <numeric_value>}
+                            """)
+    response = llm_with_tools.invoke(prompt)
+    parsed = json.loads(response.output_text)
+    state["market_rate"] = parsed["market_rate"]
+    state["num_tool_calls"] += 1
+    return state
+
+# Agent #2
+def treasury_yield_agent(state: State) -> dict:
+    """Agent gets the latest news articles and summarizes how mortgage rates are at the moment.
+    It will also review the 10 year treasury yield rate and see if it's good."""
+    prompt = PromptTemplate(template="""You are an expert on treasury yields. You should review the 
+                            current 10 Year Treasury Yield rate by calling the `get_treasury_10yr_yield_for_agent` 
+                            tool to get the current 10-year Treasury yield. When you finish, return ONLY valid JSON
+                            of the form: {"treasury_yield": <numeric_value>}
+                            """)
+    response = llm_with_tools.invoke(prompt)
+    parsed = json.loads(response.output_text)
+    state["treasury_yield"] = parsed["treasury_yield"]
+    state["num_tool_calls"] += 1
+    return state
+
+# Agent 3
+def finalizer_agent(state: State) -> dict:
+    prompt = PromptTemplate(input_variables=[#"monthly_payment", 
+                                             "interest_rate", 
+                                             "treasury_yield",
+                                             "market_rate"],
+                            prompt="""You are the mortgage refinance expert who should make the final recommendation 
+                            to the user if they should refinance. You should make your recommendation within 2
+                            sentences. Keep your response concise and to the point.
+
+                            If the user interest rate ({interest_rate}) is lower then the market rate ({market_rate})
+                            then tell them they should NOT refinance right now.
+                            Otherwise, tell them now may be a good time to refinance since their rate of {interest_rate} 
+                            is higher than the market rate of {market_rate}. If the market rate ({market_rate}) 
+                            is more than 1.0 percent lower than the user's interest rate ({interest_rate}) then let 
+                            them know it is a good time to refinance.
+
+                            If the {treasury_yield} is below 4.0% then let the user know and inform them this is a good
+                            indicator to refinance. Let them know it is an Excellent time to refinance if both the
+                            treasury yield and market rate are in their favor.
+                            """)
     
-    query
-                            
+    final_prompt = prompt.invoke({
+        "user_rate": state['interest_rate'],
+        "treasury_yield": state['treasury_yield'],
+        "market_rate": state['market_rate']
+        })
 
-
-workflow = StateGraph(State)
+    response = llm.invoke(final_prompt)
+    state["recommendation"] = response
