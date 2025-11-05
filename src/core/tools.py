@@ -7,9 +7,10 @@ from dotenv import load_dotenv
 
 load_dotenv()
 
+#@tool
 def get_treasury_10yr_yield() -> float:
     """"
-    Gets the 10yr treasury yeild from CNBC API
+    Gets the 10 year treasury yield value.
     """
 
     url = "https://quote.cnbc.com/quote-html-webservice/quote.htm"
@@ -43,9 +44,9 @@ def get_treasury_10yr_yield() -> float:
     except Exception as e:
         raise ValueError(f"Unexpected CNBC payload shape or symbol missing: {e}") from e
 
-
+#@tool
 def get_rates_search_tool() -> str:
-    """Uses Tavily to pull the top 3 """
+    """Get the average mortgage interest rate."""
 
     tavily_client = TavilyClient(api_key=os.getenv('TAVILY_API_KEY'))
 
@@ -68,14 +69,19 @@ def get_rates_search_tool() -> str:
 
 
 @tool
-def get_treasury_10yr_yield_for_agent() -> float:
-    """ Function for Agent """
-    return get_treasury_10yr_yield
+def get_treasury_10yr_yield_for_agent() -> float | str:
+    """Gets the 10 year treasury yield value."""
+    return get_treasury_10yr_yield()
 
 @tool
 def get_rates_search_tool_for_agent() -> str | float:
-    """ Function for Agent """
-    return get_rates_search_tool
+    """Get the average mortgage interest rate."""
+    return get_rates_search_tool()
+
+# tool_list = {
+#     "get_treasury_10yr_yield_for_agent": get_treasury_10yr_yield_for_agent,
+#     "get_rates_search_tool_for_agent": get_rates_search_tool_for_agent
+# }
 
 if __name__ == "__main__":
     print(get_treasury_10yr_yield())
