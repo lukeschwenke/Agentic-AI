@@ -8,7 +8,7 @@ load_dotenv()
 
 class State(TypedDict):
     interest_rate: float | str
-    treasury_yield: float | str
+    treasury_yield: float
     market_rate: float
     num_tool_calls: int
     path: List[str]

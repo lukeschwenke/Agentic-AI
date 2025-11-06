@@ -13,6 +13,6 @@ initial_state = {
 }
 
 result = app.invoke(initial_state)
-print(f'AGENTIC RECOMMENDATION: {result.get("recommendation")}')
+print(f'AGENTIC RECOMMENDATION: {result.get("recommendation").content}')
 print(f'\nThe path the agent workflow took is: {result.get("path")}')
 print(f'\nNumber of tool calls: {result.get("num_tool_calls")}')
