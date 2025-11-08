@@ -4,7 +4,7 @@ from pydantic import BaseModel, Field
 from typing import Optional, List
 from core.workflow import app as graph_app
 
-app = FastAPI(title="Refi Advisor API", version="0.1.0")
+app = FastAPI(title="Refinance Advisor API", version="1.0.0")
 
 # ----- Schemas -----
 class RefiAdviceRequest(BaseModel):
@@ -31,7 +31,7 @@ def extract_text(value) -> str:
     return str(value)
 
 # ----- Routes -----
-@app.post("/refi/advise", response_model=RefiAdviceResponse)
+@app.post("/refinance_agent/recommendation", response_model=RefiAdviceResponse)
 def return_advice_recommendation(payload: RefiAdviceRequest):
     try:
         initial_state = {
@@ -57,3 +57,6 @@ def return_advice_recommendation(payload: RefiAdviceRequest):
     except Exception as e:
         # Surface a clean 500 with reason
         raise HTTPException(status_code=500, detail=f"Advisor failed: {e}")
+    
+
+# RUN SERVER: poetry run uvicorn api.api_setup:app --host 127.0.0.1 --port 8000 --reload

@@ -1,6 +1,6 @@
 from typing import TypedDict, List
 from langchain_openai import ChatOpenAI
-from tools import *
+from core.tools import *
 import os
 from dotenv import load_dotenv
 

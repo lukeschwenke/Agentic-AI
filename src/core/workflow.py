@@ -1,6 +1,6 @@
-from define_state_and_llm import State
+from core.define_state_and_llm import State
 from langgraph.graph import StateGraph, END
-from agents import *
+from core.agents import *
 
 
 def condition(state: State) -> str:
