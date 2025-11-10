@@ -3,6 +3,8 @@ from fastapi import FastAPI, HTTPException
 from pydantic import BaseModel, Field
 from typing import Optional, List
 from core.workflow import app as graph_app
+from dotenv import load_dotenv
+load_dotenv()
 
 app = FastAPI(title="Refinance Advisor API", version="1.0.0")
 

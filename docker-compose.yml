@@ -1,0 +1,11 @@
+services:
+  api:
+    build: .
+    env_file:
+      - .env
+    ports:
+      - "${API_PORT}:${API_PORT}"
+    command: >
+      uvicorn api.api_setup:app 
+      --host 0.0.0.0 
+      --port ${API_PORT}
