@@ -42,4 +42,4 @@ CMD ["sh", "-c", "uvicorn api.api_setup:app --host 0.0.0.0 --port ${API_PORT}"]
 
 
 # docker build -t refinance_tool .
-# docker run --name refinance_api --env_file .env -p 8000:8000 refinance_tool
+# docker run --name refinance_api --env-file .env -p 8000:8000 refinance_tool

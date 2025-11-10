@@ -82,7 +82,8 @@ def finalizer_agent(state: State) -> dict:
                             indicator to refinance. Let them know it is an Excellent time to refinance if both the
                             treasury yield and market rate are in their favor. 
                             
-                            You MUST tell the user what the current treasury yield value is by reporting this number: {treasury_yield}
+                            You MUST tell the user what the current treasury yield value is by reporting this number: {treasury_yield}. 
+                            If the {treasury_yield} value is 0 or 0.0 tell the user you did NOT check this value.
                             You MUST tell the user what the current market rate is by reporting this number: {market_rate}
                             """)
     
