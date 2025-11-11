@@ -129,7 +129,7 @@ def finalizer_agent(state: State) -> dict:
     prompt = PromptTemplate(input_variables=["interest_rate", 
                                              "treasury_yield",
                                              "market_rate",
-                                             "monthly_payment",
+                                             "current_payment",
                                              "monthly_savings",
                                              "break_even",
                                              "new_payment",
@@ -156,9 +156,9 @@ def finalizer_agent(state: State) -> dict:
                             You MUST tell the user what the current market rate is by reporting this number ({market_rate}) as a percent (e.g., 6.125%).
 
                             # CALCULATION REPORTING
-                            You MUST inform the user that you calculated their estimated monthly savings by taking their monthly Principal and Interest payment ({monthly_payment})
+                            You MUST inform the user that you calculated their estimated monthly savings by taking their monthly Principal and Interest payment ({current_payment})
                             and subtracting their estimated new payment ({new_payment}) to come up with their savings of {monthly_savings}.
-                            You MUST inform the user you estimated their new monthly payment with a 30-year loan, the average market interest rate of {market_rate}, and a
+                            You MUST inform the user you estimated their new payment with a 30-year loan, the average market interest rate of {market_rate}, and a
                             loan value that is their remaining mortgage balance ({mortgage_balance}).
 
                             # GENERAL INFO
@@ -171,7 +171,7 @@ def finalizer_agent(state: State) -> dict:
         "interest_rate": state['interest_rate'],
         "treasury_yield": state['treasury_yield'],
         "market_rate": state['market_rate'],
-        "monthly_payment": state['monthly_payment'],
+        "current_payment": state['current_payment'],
         "monthly_savings": state['monthly_savings'],
         "break_even": state['break_even'],
         "new_payment": state['new_payment'],

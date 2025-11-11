@@ -19,9 +19,9 @@ class State(TypedDict):
     break_even: float
     recommendation: str
 
-llm = ChatOpenAI(model="gpt-4o-mini",
+llm = ChatOpenAI(model="gpt-5",
                  api_key=os.getenv("OPENAI_API_KEY"),
-                 temperature=0.5)
+                 temperature=0.1)
 
 llm_with_tools = llm.bind_tools([get_treasury_10yr_yield_for_agent,
                                  get_rates_search_tool_for_agent,

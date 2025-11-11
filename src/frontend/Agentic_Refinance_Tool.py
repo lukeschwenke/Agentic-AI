@@ -13,6 +13,8 @@ if "resp" not in st.session_state:
 
 # User Input + Basic Validation
 rate_str = st.text_input("What is your current mortgage interest rate (%)", placeholder="e.g., 6.125")
+current_payment_str = st.text_input("What is your current monthly mortgage payment (principal and interest only)?", placeholder="e.g., $3,350")
+mortgage_balance_str = st.text_input("What is the remaining balance on your mortgage loan?", placeholder="e.g., $500,000")
 run = st.button("Get recommendation")
 
 # Show the user what API it's hitting
@@ -20,16 +22,24 @@ st.write(":wrench: API Being Used:", os.getenv("API_BASE_URL"),
          ":", os.getenv("API_PORT"),
          "/", os.getenv("API_PATH"))
 
+def clean_strings(text: str) -> str:
+    return text.strip().replace("%", "").replace("$", "")
+
 if run:
     if not rate_str or not rate_str.strip():
-        st.error("Please enter a rate first, e.g. 6.125 or 6.125%")
+        st.error("Please enter an interest rate.")
+    if not current_payment_str or not current_payment_str.strip():
+        st.error("Please enter a current monthly payment.")
+    if not mortgage_balance_str or not mortgage_balance_str.strip():
+        st.error("Please enter a mortgage balance.")
     try:
-        cleaned=rate_str.strip().replace("%", "")
-        rate = float(cleaned)
+        rate=float(clean_strings(rate_str))
+        current_payment=float(clean_strings(current_payment_str))
+        mortgage_balance=float(clean_strings(mortgage_balance_str))
         with st.spinner("Calling agents for a recommendation..."):
-            st.session_state.resp = get_recommendation(rate)
+            st.session_state.resp = get_recommendation(rate, current_payment, mortgage_balance)
     except ValueError:
-        st.error("Please enter a valid number, e.g. 6.125 or 6.125%")
+        st.error("Please enter valid numbers only.")
         st.stop()
 
 # Render results only if we have them
@@ -53,5 +63,5 @@ if resp:
             else:
                 st.code(str(path))
 
-# Option #1: streamlit run streamlit_app.py
-# Option #2: poetry run streamlit run streamlit_app.py
+# Option #1: streamlit run Agentic_Refinance_Tool.py
+# Option #2: poetry run streamlit run Agentic_Refinance_Tool.py
