@@ -12,6 +12,7 @@ def condition(state: State) -> str:
 workflow = StateGraph(State)
 workflow.add_node("market", market_expert_agent)
 workflow.add_node("treasury_yield", treasury_yield_agent)
+workflow.add_node("calculator", calculator_agent)
 workflow.add_node("finalizer", finalizer_agent)
 
 workflow.set_entry_point("market")

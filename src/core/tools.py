@@ -3,6 +3,7 @@ from langchain_core.tools import tool
 from tavily import TavilyClient
 import os
 from dotenv import load_dotenv
+from pydantic import BaseModel
 
 
 load_dotenv()
@@ -64,33 +65,62 @@ def get_rates_search_tool() -> str:
     answer = response["answer"]
     return answer
 
-def calculate_estimates_and_breakeven(current_xpayment, mortgage_balance) -> str:
-    """asdasd"""
+def calculate_estimates_and_breakeven(#interest_rate: float,
+                                      current_payment: float, 
+                                      mortgage_balance: float, 
+                                      market_rate: float) -> tuple[float, float]:
+    """Calculate the new monthly mortgage payment and the break-even period on the closing costs"""
+    ### New Payment Calculation ###
+    remaining_term_years = 30
+    # Convert to monthly rate
+    r = (market_rate / 100) / 12
+    n = int(remaining_term_years * 12)  # total remaining monthly payments
+    # Compute new monthly payment using amortization formula
+    if r == 0:
+        # Zero-interest edge case
+        return mortgage_balance / n
+    # New Monthly Mortgage Payment (P&I only)
+    new_payment = mortgage_balance * (r * (1 + r)**n) / ((1 + r)**n - 1)
 
-    current_principal_and_interest = state[principal_and_interest]
-
-    mortgage_loan_balance
-
+    ### Break Even Calculation ###
+    estimated_closing_costs = mortgage_balance * 0.01
+    monthly_savings = current_payment - new_payment
+    break_even = estimated_closing_costs / monthly_savings
+    
+    return new_payment, monthly_savings, break_even
 
 # Define the tools for the agents to use using LangChains tool decorate
 # It needs to be done this way because PyTest will throw an error if @tool is present 
 # on the function it's testing
 
-
 @tool
-def get_treasury_10yr_yield_for_agent() -> float | str:
+def get_treasury_10yr_yield_for_agent() -> float:
     """Gets the 10 year treasury yield value."""
     return get_treasury_10yr_yield()
 
 @tool
-def get_rates_search_tool_for_agent() -> str | float:
+def get_rates_search_tool_for_agent() -> str:
     """Get the average mortgage interest rate."""
     return get_rates_search_tool()
 
-@tool
-def calculate_estimates_and_breakeven_for_agent():
-    """Calculate the user's estimated P&I and their breakeven point."""
-    return calculate_estimates_and_breakeven()
+
+class CalcArgs(BaseModel):
+    current_payment: float
+    mortgage_balance: float
+    market_rate: float
+
+@tool(args_schema=CalcArgs)
+def calculate_estimates_and_breakeven_for_agent(
+    current_payment: float,
+    mortgage_balance: float,
+    market_rate: float
+) -> tuple[float, float, float]:
+    """Calculate the user's estimated new payment, savings, and break-even point."""
+    return calculate_estimates_and_breakeven(
+        current_payment=current_payment,
+        mortgage_balance=mortgage_balance,
+        market_rate=market_rate
+    )
 # tool_list = {
 #     "get_treasury_10yr_yield_for_agent": get_treasury_10yr_yield_for_agent,
 #     "get_rates_search_tool_for_agent": get_rates_search_tool_for_agent
