@@ -17,7 +17,8 @@ workflow.add_node("finalizer", finalizer_agent)
 workflow.set_entry_point("market")
 workflow.add_conditional_edges("market", condition, {"CONTINUE": "treasury_yield",
                                                      "END": "finalizer"})
-workflow.add_edge("treasury_yield", "finalizer")
-workflow.add_edge('finalizer', END)
+workflow.add_edge("treasury_yield", "calculator")
+workflow.add_edge("calculator", "finalizer")
+workflow.add_edge("finalizer", END)
 
 app=workflow.compile()

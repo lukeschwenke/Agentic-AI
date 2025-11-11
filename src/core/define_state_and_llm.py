@@ -13,12 +13,15 @@ class State(TypedDict):
     num_tool_calls: int
     path: List[str]
     recommendation: str
+    principal_and_interest: float
     #credit_score: int
     #closing_costs: int
     #current_payment: int
 
 llm = ChatOpenAI(model="gpt-4o-mini",
-                 api_key=os.getenv("OPENAI_API_KEY"))
+                 api_key=os.getenv("OPENAI_API_KEY"),
+                 temperature=0.5)
 
 llm_with_tools = llm.bind_tools([get_treasury_10yr_yield_for_agent,
-                                 get_rates_search_tool_for_agent])
+                                 get_rates_search_tool_for_agent,
+                                 calculate_estimates_and_breakeven_for_agent])

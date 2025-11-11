@@ -63,6 +63,15 @@ def get_rates_search_tool() -> str:
 
     answer = response["answer"]
     return answer
+
+def calculate_estimates_and_breakeven(current_xpayment, mortgage_balance) -> str:
+    """asdasd"""
+
+    current_principal_and_interest = state[principal_and_interest]
+
+    mortgage_loan_balance
+
+
 # Define the tools for the agents to use using LangChains tool decorate
 # It needs to be done this way because PyTest will throw an error if @tool is present 
 # on the function it's testing
@@ -78,6 +87,10 @@ def get_rates_search_tool_for_agent() -> str | float:
     """Get the average mortgage interest rate."""
     return get_rates_search_tool()
 
+@tool
+def calculate_estimates_and_breakeven_for_agent():
+    """Calculate the user's estimated P&I and their breakeven point."""
+    return calculate_estimates_and_breakeven()
 # tool_list = {
 #     "get_treasury_10yr_yield_for_agent": get_treasury_10yr_yield_for_agent,
 #     "get_rates_search_tool_for_agent": get_rates_search_tool_for_agent

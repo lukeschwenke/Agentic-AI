@@ -4,7 +4,9 @@ import json
 from core.tools import *
 from langgraph.prebuilt import ToolNode
 
-tool_nodes = ToolNode([get_treasury_10yr_yield_for_agent, get_rates_search_tool_for_agent])
+tool_nodes = ToolNode([get_treasury_10yr_yield_for_agent, 
+                       get_rates_search_tool_for_agent,
+                       calculate_estimates_and_breakeven_for_agent])
 
 # Agent #1
 def market_expert_agent(state: State) -> dict:
@@ -61,30 +63,45 @@ def treasury_yield_agent(state: State) -> dict:
     state["path"].append("treasury_yield_agent")
     return state
 
-# Agent #3
+# # Agent #3
+# def calculate_break_even_agent(state: State) -> dict:
+#     """Agent intakes the user's current principal and interest payment as well as a calculated estimated principal 
+#     and interest payment based their loan amount. The agent will get a difference in payment (savings) between the current
+#     and estimated payment. The estimated closing costs will also be calculated. The estimated closing costs divided by savings is the break even
+#     calculation that will be displayed."""
+#     current_principal_and_interest = state[principal_and_interest]
+
+
+# Agent #4
 def finalizer_agent(state: State) -> dict:
+    """Agent finalizes the recommendation to the user based on their interest rate, the market interest rate, 
+    and the 10-year treasury yield value."""
     prompt = PromptTemplate(input_variables=[#"monthly_payment", 
                                              "interest_rate", 
                                              "treasury_yield",
                                              "market_rate"],
-                            template="""You are the mortgage refinance expert who should make the final recommendation 
-                            to the user if they should refinance. You should make your recommendation within 2
+                            template="""You are a mortgage refinance expert who should make the final recommendation 
+                            to the user if they should refinance or not. You should make your recommendation within 3-5
                             sentences. Keep your response concise and to the point.
 
                             If the user interest rate ({interest_rate}) is lower then the market rate ({market_rate})
-                            then tell them they should NOT refinance right now.
+                            then tell them they should NOT refinance right now since their rate is better than the market rate.
                             Otherwise, tell them now may be a good time to refinance since their rate of {interest_rate} 
                             is higher than the market rate of {market_rate}. If the market rate ({market_rate}) 
                             is more than 1.0 percent lower than the user's interest rate ({interest_rate}) then let 
                             them know it is a good time to refinance.
 
-                            If the {treasury_yield} is below 4.0% then let the user know and inform them this is a good
-                            indicator to refinance. Let them know it is an Excellent time to refinance if both the
-                            treasury yield and market rate are in their favor. 
-                            
-                            You MUST tell the user what the current treasury yield value is by reporting this number: {treasury_yield}. 
-                            If the {treasury_yield} value is 0 or 0.0 tell the user you did NOT check this value.
-                            You MUST tell the user what the current market rate is by reporting this number: {market_rate}
+                            If the {treasury_yield} is below 4.0 then let the user know and inform them this is a good
+                            indicator to refinance. If the {treasury_yield} is above 4.0 then let the user know they should consider waiting for the treasury
+                            yield to come down more. Let them know it is an Excellent time to refinance if the
+                            treasury yield is below 4.0 and the market rate ({market_rate}) is 1.0 percent lower then their interest rate ({interest_rate}).
+
+                            You MUST tell the user what the current treasury yield value is by reporting this number ({treasury_yield}) as a percent (e.g., 4.102%). 
+                            If the {treasury_yield} value is 0 or 0.0 tell the user you did not check this value since their interest rate is better than the market rate.
+                            You MUST tell the user what the current market rate is by reporting this number ({market_rate}) as a percent (e.g., 6.125%).
+
+                            In general, a market rate that is lower than the user's interest rate indicates refinancing is good but it is best to target a market rate
+                            that is 1.0 percent or more lower. If the {market_rate} is higher than the user's {interest_rate} that means refinancing is a bad option.
                             """)
     
     final_prompt = prompt.invoke({
