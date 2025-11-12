@@ -4,7 +4,11 @@ from pydantic import BaseModel, Field
 from typing import Optional, List
 from core.workflow import app as graph_app
 from dotenv import load_dotenv
+import logging
+import traceback
 load_dotenv()
+
+logger = logging.getLogger("uvicorn.error")
 
 app = FastAPI(title="Refinance Advisor API", version="1.0.0")
 
@@ -45,11 +49,14 @@ def return_advice_recommendation(payload: RefiAdviceRequest):
             "interest_rate": payload.interest_rate,
             "current_payment": payload.current_payment,
             "mortgage_balance": payload.mortgage_balance,
-            "treasury_yield": 0.0,
-            "market_rate": 0.0,
-            "recommendation": "",
+            "treasury_yield": None,
+            "market_rate": None,
             "num_tool_calls": 0,
             "path": [],
+            "new_payment": None,
+            "monthly_savings": None,
+            "break_even": None,
+            "recommendation": "",
         }
 
         result = graph_app.invoke(initial_state)
@@ -60,12 +67,14 @@ def return_advice_recommendation(payload: RefiAdviceRequest):
             treasury_yield=result.get("treasury_yield"),
             num_tool_calls=int(result.get("num_tool_calls", 0)),
             path=list(result.get("path", [])),
-            new_payment=result.get("new_payment"),
-            monthly_savings=result.get("monthly_savings"),
-            break_even=result.get("break_even")
+            new_payment=result.get("new_payment", None),
+            monthly_savings=result.get("monthly_savings", None),
+            break_even=result.get("break_even", None)
             )
         return resp
     except Exception as e:
-        raise HTTPException(status_code=500, detail=f"Advisor failed: {e}")
+        #raise HTTPException(status_code=500, detail=f"Advisor failed: {e}")
+        logger.error("Advisor failure:\n%s", traceback.format_exc())
+        raise HTTPException(status_code=500, detail=f"Advisor failed: {str(e)}")
 
 # RUN SERVER: poetry run uvicorn api.api_setup:app --host 127.0.0.1 --port 8000 --reload

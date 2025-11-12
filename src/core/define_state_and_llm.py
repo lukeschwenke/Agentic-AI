@@ -14,12 +14,12 @@ class State(TypedDict):
     path: List[str]
     current_payment: float
     mortgage_balance: float
-    new_payment: float
-    monthly_savings: float
-    break_even: float
+    new_payment: float | None
+    monthly_savings: float | None
+    break_even: float | None
     recommendation: str
 
-llm = ChatOpenAI(model="gpt-5",
+llm = ChatOpenAI(model=os.getenv("OPENAI_MODEL_NAME"),
                  api_key=os.getenv("OPENAI_API_KEY"),
                  temperature=0.1)
 

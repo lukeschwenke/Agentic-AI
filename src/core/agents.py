@@ -3,6 +3,7 @@ from langchain_core.prompts import PromptTemplate
 import json
 from core.tools import *
 from langgraph.prebuilt import ToolNode
+from pathlib import Path
 
 tool_nodes = ToolNode([get_treasury_10yr_yield_for_agent, 
                        get_rates_search_tool_for_agent,
@@ -126,6 +127,10 @@ def calculator_agent(state: State) -> dict:
 def finalizer_agent(state: State) -> dict:
     """Agent finalizes the recommendation to the user based on their interest rate, the market interest rate, 
     and the 10-year treasury yield value."""
+
+    PROMPT_PATH = "src/prompts/finalizer_prompt.txt"
+    FINALIZER_PROMPT = Path(PROMPT_PATH).read_text()
+    
     prompt = PromptTemplate(input_variables=["interest_rate", 
                                              "treasury_yield",
                                              "market_rate",
@@ -134,49 +139,56 @@ def finalizer_agent(state: State) -> dict:
                                              "break_even",
                                              "new_payment",
                                              "mortgage_balance"],
-                            template="""You are a mortgage refinance expert who should make the final recommendation 
-                            to the user if they should refinance or not. You should make your recommendation within 5-8
-                            sentences. Keep your response concise and to the point.
+                              template=FINALIZER_PROMPT)
+                            # template="""You are a mortgage refinance expert who should make the final recommendation 
+                            # to the user if they should refinance or not. You should make your recommendation within 5-8
+                            # sentences. Keep your response concise and to the point.
 
-                            # INTEREST RATE CHECK
-                            If the user interest rate ({interest_rate}) is lower then the market rate ({market_rate})
-                            then tell them they should NOT refinance right now since their rate is better than the market rate.
-                            Otherwise, tell them now may be a good time to refinance since their rate of {interest_rate} 
-                            is higher than the market rate of {market_rate}. If the market rate ({market_rate}) 
-                            is more than 1.0 percent lower than the user's interest rate ({interest_rate}) then let 
-                            them know it is a good time to refinance.
+                            # # FORMAT:
+                            # Ensure all dollar values are formatting properly with a dollar sign and commans (e.g., $7,124.32)
+
+                            # # IMPORTANT!
+                            # If the user interest rate ({interest_rate}) is lower than the market rate ({market_rate})
+                            # then tell them they should NOT refinance right now since their rate is already LOWER than the market rate.
+                            # If the user interest rate ({interest_rate}) is higher than the market rate ({market_rate}), continue:
+
+                            # # INTEREST RATE CHECK
+                            # Otherwise, tell them now may be a good time to refinance since their rate of {interest_rate} 
+                            # is higher than the market rate of {market_rate}. If the market rate ({market_rate}) 
+                            # is more than 1.0 percent lower than the user's interest rate ({interest_rate}) then let 
+                            # them know it is a good time to refinance.
                             
-                            # TREASURY YIELD CHECK
-                            If the {treasury_yield} is below 4.0 then let the user know and inform them this is a good
-                            indicator to refinance. If the {treasury_yield} is above 4.0 then let the user know they should consider waiting for the treasury
-                            yield to come down more. Let them know it is an Excellent time to refinance if the
-                            treasury yield is below 4.0 and the market rate ({market_rate}) is 1.0 percent lower then their interest rate ({interest_rate}).
-                            You MUST tell the user what the current treasury yield value is by reporting this number ({treasury_yield}) as a percent (e.g., 4.102%). 
-                            If the {treasury_yield} value is 0 or 0.0 tell the user you did not check this value since their interest rate is better than the market rate.
-                            You MUST tell the user what the current market rate is by reporting this number ({market_rate}) as a percent (e.g., 6.125%).
+                            # # TREASURY YIELD CHECK
+                            # If the {treasury_yield} is below 4.0 then let the user know and inform them this is a good
+                            # indicator to refinance. If the {treasury_yield} is above 4.0 then let the user know they should consider waiting for the treasury
+                            # yield to come down more. Let them know it is an Excellent time to refinance if the
+                            # treasury yield is below 4.0 and the market rate ({market_rate}) is 1.0 percent lower then their interest rate ({interest_rate}).
+                            # You MUST tell the user what the current treasury yield value is by reporting this number ({treasury_yield}) as a percent (e.g., 4.102%). 
+                            # If the {treasury_yield} value is 0 or 0.0 tell the user you did not check this value since their interest rate is better than the market rate.
+                            # You MUST tell the user what the current market rate is by reporting this number ({market_rate}) as a percent (e.g., 6.125%).
 
-                            # CALCULATION REPORTING
-                            You MUST inform the user that you calculated their estimated monthly savings by taking their monthly Principal and Interest payment ({current_payment})
-                            and subtracting their estimated new payment ({new_payment}) to come up with their savings of {monthly_savings}.
-                            You MUST inform the user you estimated their new payment with a 30-year loan, the average market interest rate of {market_rate}, and a
-                            loan value that is their remaining mortgage balance ({mortgage_balance}).
+                            # # CALCULATION REPORTING
+                            # You MUST inform the user that you calculated their estimated monthly savings by taking their monthly Principal and Interest payment ({current_payment})
+                            # and subtracting their estimated new payment ({new_payment}) to come up with their savings of {monthly_savings}.
+                            # You MUST inform the user you estimated their new payment with a 30-year loan, the average market interest rate of {market_rate}, and a
+                            # loan value that is their remaining mortgage balance ({mortgage_balance}).
 
-                            # GENERAL INFO
-                            In general, a market rate that is lower than the user's interest rate indicates refinancing is good but it is best to target a market rate
-                            that is 1.0 percent or more lower. If the {market_rate} is higher than the user's {interest_rate} that means refinancing is a bad option.
-                            All numbers you report should NOT be more than 3 decimal places (e.g. 7.125).
-                            """)
+                            # # GENERAL INFO
+                            # In general, a market rate that is lower than the user's interest rate indicates refinancing is good but it is best to target a market rate
+                            # that is 1.0 percent or more lower. If the {market_rate} is higher than the user's {interest_rate} that means refinancing is a bad option.
+                            # All numbers you report should NOT be more than 3 decimal places (e.g. 7.125).
+                            # """)
     
-    final_prompt = prompt.invoke({
-        "interest_rate": state['interest_rate'],
-        "treasury_yield": state['treasury_yield'],
-        "market_rate": state['market_rate'],
-        "current_payment": state['current_payment'],
-        "monthly_savings": state['monthly_savings'],
-        "break_even": state['break_even'],
-        "new_payment": state['new_payment'],
-        "mortgage_balance": state['mortgage_balance']
-        })
+    final_prompt = prompt.format(
+        interest_rate=state['interest_rate'],
+        current_payment=state['current_payment'],
+        mortgage_balance=state['mortgage_balance'],
+        market_rate=state['market_rate'],
+        treasury_yield=state['treasury_yield'],
+        monthly_savings=state['monthly_savings'],
+        break_even=state['break_even'],
+        new_payment=state['new_payment'],
+    )
 
     response = llm.invoke(final_prompt)
     state["recommendation"] = response

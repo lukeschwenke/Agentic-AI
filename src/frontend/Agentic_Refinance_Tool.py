@@ -63,5 +63,4 @@ if resp:
             else:
                 st.code(str(path))
 
-# Option #1: streamlit run Agentic_Refinance_Tool.py
-# Option #2: poetry run streamlit run Agentic_Refinance_Tool.py
+# RUN: poetry run streamlit run Agentic_Refinance_Tool.py
