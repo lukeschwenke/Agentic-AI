@@ -1,5 +1,6 @@
 from typing import TypedDict, List
 from langchain_openai import ChatOpenAI
+from langchain_ollama import ChatOllama
 from core.tools import *
 import os
 from dotenv import load_dotenv
@@ -22,6 +23,12 @@ class State(TypedDict):
 llm = ChatOpenAI(model=os.getenv("OPENAI_MODEL_NAME"),
                  api_key=os.getenv("OPENAI_API_KEY"),
                  temperature=0.1)
+
+# #Ollama Support
+# llm = ChatOllama(model="gpt-oss:20b",
+#                  temperature=0.1)
+# Start ollam model
+# OLLAMA_HOST=127.0.0.1:11435 ollama serve
 
 llm_with_tools = llm.bind_tools([get_treasury_10yr_yield_for_agent,
                                  get_rates_search_tool_for_agent,
