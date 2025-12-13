@@ -121,10 +121,6 @@ def calculate_estimates_and_breakeven_for_agent(
         mortgage_balance=mortgage_balance,
         market_rate=market_rate
     )
-# tool_list = {
-#     "get_treasury_10yr_yield_for_agent": get_treasury_10yr_yield_for_agent,
-#     "get_rates_search_tool_for_agent": get_rates_search_tool_for_agent
-# }
 
 if __name__ == "__main__":
     print(get_treasury_10yr_yield())
