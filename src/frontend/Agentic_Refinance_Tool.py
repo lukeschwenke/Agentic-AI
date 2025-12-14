@@ -1,6 +1,7 @@
 import os
 import streamlit as st
 from client import get_recommendation
+import time
 
 st.set_page_config(page_title="Agentic Refinance Tool", page_icon="🏡")
 
@@ -18,7 +19,7 @@ mortgage_balance_str = st.text_input("What is the remaining balance on your mort
 run = st.button("Get recommendation")
 
 # Show the user what API it's hitting
-st.write(":wrench: API Being Used:", os.getenv("API_BASE_URL"),
+st.write(":wrench: Backend API Being Used:", os.getenv("API_BASE_URL"),
          ":", os.getenv("API_PORT"),
          "/", os.getenv("API_PATH"))
 
@@ -36,8 +37,23 @@ if run:
         rate=float(clean_strings(rate_str))
         current_payment=float(clean_strings(current_payment_str))
         mortgage_balance=float(clean_strings(mortgage_balance_str))
+
+        # Placeholder for secondary message
+        status_placeholder = st.empty()
+        start_time = time.time()
+
         with st.spinner("Calling agents for a recommendation..."):
-            st.session_state.resp = get_recommendation(rate, current_payment, mortgage_balance)
+            resp = get_recommendation(rate, current_payment, mortgage_balance)
+
+            # Check elapsed time *after* return
+            elapsed = time.time() - start_time
+            if elapsed >= 10:
+                st.info(
+                    "🤖 Our agents are working hard! Hang tight while they collaborate on a recommendation..."
+                )
+
+            st.session_state.resp = resp
+                
     except ValueError:
         st.error("Please enter valid numbers only.")
         st.stop()
