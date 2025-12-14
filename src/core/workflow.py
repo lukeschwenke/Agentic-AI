@@ -1,6 +1,9 @@
 from core.define_state_and_llm import State
 from langgraph.graph import StateGraph, END
 from core.agents import *
+from IPython.display import Image
+from io import BytesIO
+from PIL import Image
 
 
 def condition(state: State) -> str:
@@ -23,3 +26,11 @@ workflow.add_edge("calculator", "finalizer")
 workflow.add_edge("finalizer", END)
 
 app=workflow.compile()
+
+# Generate the visual graph
+workflow_image = None
+try:
+    png_bytes = app.get_graph().draw_mermaid_png()
+    workflow_image = Image.open(BytesIO(png_bytes))
+except Exception:
+    workflow_image = None

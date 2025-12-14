@@ -2,10 +2,11 @@ import os
 import streamlit as st
 from client import get_recommendation
 import time
+import html
 
 st.set_page_config(page_title="Agentic Refinance Tool", page_icon="🏡")
 
-st.title("Agentic Refinance Tool")
+st.title("Refi with Agentic AI")
 st.caption("Hello! Use this Agentic AI powered refinance tool to determine if now is a good time for you to refinance.")
 
 # Ensure there is a place to store the last response
@@ -44,14 +45,6 @@ if run:
 
         with st.spinner("Calling agents for a recommendation..."):
             resp = get_recommendation(rate, current_payment, mortgage_balance)
-
-            # Check elapsed time *after* return
-            elapsed = time.time() - start_time
-            if elapsed >= 10:
-                st.info(
-                    "🤖 Our agents are working hard! Hang tight while they collaborate on a recommendation..."
-                )
-
             st.session_state.resp = resp
                 
     except ValueError:
@@ -66,8 +59,23 @@ if resp:
     else:
         st.success("Success!")
         st.subheader("Your Refinance Recommendation: ")
-        st.write(resp.get("recommendation", "-"))
 
+        recommendation = html.escape(resp.get("recommendation", "-")).replace("\n", "<br>")
+
+        st.markdown(
+            f"""
+            <div style="
+                font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+                font-size: 1.05rem;
+                line-height: 1.6;
+            ">
+                {recommendation}
+            </div>
+            """,
+            unsafe_allow_html=True
+        )
+
+        st.write("")
         col1, col2 = st.columns(2)
         with col1:
             st.metric("Total number of agentic tools called:", resp.get("num_tool_calls", "-"))
