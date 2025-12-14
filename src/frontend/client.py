@@ -6,10 +6,20 @@ from api.api_setup import RefiAdviceRequest, RefiAdviceResponse
 
 load_dotenv()
 
-API_BASE_URL = os.getenv("API_BASE_URL")
-API_PORT = os.getenv("API_PORT")
-API_NAME = os.getenv("API_PATH")
-FULL_API_URL = f"{str(API_BASE_URL)}:{str(API_PORT)}/{str(API_NAME)}"
+# API_BASE_URL = os.getenv("API_BASE_URL")
+# API_PORT = os.getenv("API_PORT")
+# API_NAME = os.getenv("API_PATH")
+# FULL_API_URL = f"{str(API_BASE_URL)}:{str(API_PORT)}/{str(API_NAME)}"
+
+API_BASE_URL = (os.getenv("API_BASE_URL") or "http://127.0.0.1").rstrip("/")
+API_PORT = (os.getenv("API_PORT") or "8000").strip()
+API_PATH = (os.getenv("API_PATH") or "refinance_agent/recommendation/").lstrip("/")
+
+# If API_BASE_URL already includes a port, don't append API_PORT
+if "://" in API_BASE_URL and API_BASE_URL.rsplit(":", 1)[-1].isdigit():
+    FULL_API_URL = f"{API_BASE_URL}/{API_PATH}"
+else:
+    FULL_API_URL = f"{API_BASE_URL}:{API_PORT}/{API_PATH}"
 
 def get_recommendation(interest_rate: float,
                        current_payment: float,
