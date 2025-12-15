@@ -3,11 +3,17 @@ import streamlit as st
 from client import get_recommendation
 import time
 import html
+from pathlib import Path
 
 st.set_page_config(page_title="Agentic Refinance Tool", page_icon="🏡")
 
 st.title("Refi with Agentic AI")
-st.caption("Hello! Use this Agentic AI powered refinance tool to determine if now is a good time for you to refinance.")
+st.markdown("##### Hello! Use this Agentic AI powered refinance tool to determine if now is a good time for you to refinance.")
+
+FRONTEND_DIR = Path(__file__).resolve().parents[0]
+IMG_PATH = FRONTEND_DIR / "images" / "landing_page_v1.png"
+#st.set_page_config(layout="wide")
+st.image(str(IMG_PATH), use_container_width=True)
 
 # Ensure there is a place to store the last response
 if "resp" not in st.session_state:
