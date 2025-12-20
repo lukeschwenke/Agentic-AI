@@ -1,20 +1,39 @@
 import streamlit as st
+from PIL import Image as PILImage
+from io import BytesIO
+import traceback
+from pathlib import Path
+#from langchain_core.runnables.graph import MermaidDrawMethod
 
 st.set_page_config(page_title="Agentic Workflow Details")
 
 st.markdown("# Agentic Workflow Details")
 #st.sidebar.header("Technical Details")
 
+FRONTEND_DIR = Path(__file__).resolve().parents[1]
+IMG_PATH = FRONTEND_DIR / "images" / "agentic_dag.png"
+
 col1, col2 = st.columns(2)
 
 with col1:
     st.markdown("""#### Agentic Workflow:""")
     st.markdown("""###### *Directed Acyclic Diagram (DAG)*""")
-    from core.workflow import workflow_image
-    if workflow_image is not None:
+    # from core.workflow import workflow_image
+    # if workflow_image is not None:
+    #     st.image(workflow_image, width=300)
+    # else:
+    #     st.info("Workflow diagram unavailable (Mermaid PNG render failed).")
+
+    from core.workflow import app
+    workflow_image = None
+    try:
+        #png_bytes = app.get_graph().draw_mermaid_png(max_retries=5, retry_delay=2.0)
+        #workflow_image = PILImage.open(BytesIO(png_bytes))
+        workflow_image = IMG_PATH
         st.image(workflow_image, width=300)
-    else:
-        st.info("Workflow diagram unavailable (Mermaid PNG render failed).")
+    except Exception:
+        st.code(traceback.format_exc())
+        workflow_image = None
 
 with col2:
     st.markdown("""#### Overview of Agents:""")

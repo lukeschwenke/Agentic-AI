@@ -21,7 +21,8 @@ dependencies = [
     "uvicorn (>=0.38.0,<0.39.0)",
     "streamlit (>=1.51.0,<2.0.0)",
     "dotenv (>=0.9.9,<0.10.0)",
-    "langchain-ollama (>=1.0.0,<2.0.0)"
+    "langchain-ollama (>=1.0.0,<2.0.0)",
+    "pyppeteer (>=2.0.0,<3.0.0)"
 ]
 
 

@@ -3,7 +3,7 @@ from langgraph.graph import StateGraph, END
 from core.agents import *
 from IPython.display import Image
 from io import BytesIO
-from PIL import Image
+from PIL import Image as PILImage
 
 
 def condition(state: State) -> str:
@@ -28,9 +28,9 @@ workflow.add_edge("finalizer", END)
 app=workflow.compile()
 
 # Generate the visual graph
-workflow_image = None
-try:
-    png_bytes = app.get_graph().draw_mermaid_png()
-    workflow_image = Image.open(BytesIO(png_bytes))
-except Exception:
-    workflow_image = None
+# workflow_image = None
+# try:
+#     png_bytes = app.get_graph().draw_mermaid_png()
+#     workflow_image = PILImage.open(BytesIO(png_bytes))
+# except Exception:
+#     workflow_image = None
