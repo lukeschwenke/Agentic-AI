@@ -26,9 +26,11 @@ mortgage_balance_str = st.text_input("What is the remaining balance on your mort
 run = st.button("Get recommendation")
 
 # Show the user what API it's hitting
-st.write(":wrench: Backend API Being Used:", os.getenv("API_BASE_URL"),
+st.write(":wrench: Backend API:", os.getenv("API_BASE_URL"),
          ":", os.getenv("API_PORT"),
          "/", os.getenv("API_PATH"))
+
+st.write(f":brain: LLM: {os.getenv('OPENAI_MODEL_NAME')}")
 
 def clean_strings(text: str) -> str:
     return text.strip().replace("%", "").replace("$", "")

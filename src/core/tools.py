@@ -52,13 +52,13 @@ def get_rates_search_tool() -> str:
     tavily_client = TavilyClient(api_key=os.getenv('TAVILY_API_KEY'))
 
     response = tavily_client.search(
-        query="""What is the current average mortgage interest rate people in the United States are receiving?" \
+        query="""What is the current average mortgage interest rate people in the United States with high credit scores (750+) are receiving?" \
         "Provide the answer as a number with 2 decimal places. E.g., 6.55.
         ONLY provide the number without any additional text.""",
         topic="finance",
         search_depth="basic",
-        max_results=3,
-        time_range="week",
+        max_results=5,
+        time_range="day",
         include_answer=True #Include an LLM-generated answer to the provided query. 
     )
 
