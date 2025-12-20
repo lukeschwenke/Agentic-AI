@@ -62,7 +62,7 @@ push-ecr: login-ecr build-ecr
 
 # FIX
 login-ec2-and-pull:
-	yes | aws ec2-instance-connect ssh \
+	aws ec2-instance-connect ssh \
 		--region $(AWS_REGION) \
 		--instance-id $(EC2_INSTANCE_ID) \
 		--os-user $(EC2_USER) \
