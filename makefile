@@ -11,6 +11,10 @@ ECR_REPO=datascience/agentic-ai-mortgage-refinance-tool
 ECR_URI=$(AWS_ACCOUNT_ID).dkr.ecr.$(AWS_REGION).amazonaws.com/$(ECR_REPO)
 IMAGE_TAG=latest
 
+EC2_USER = ec2-user
+EC2_INSTANCE_ID = i-084c4683b040ea62f
+EC2_DIR = agentic-refi
+
 build:
 	docker buildx build \
 		--platform $(PLATFORM) \
@@ -38,7 +42,7 @@ rebuild: stop build run ui
 # docker run --name refinance_api --env-file .env -p 8000:8000 refinance_tool
 
 
-# -------- ECR --------
+# -------- PUSH TO ECR --------
 
 login-ecr:
 	aws ecr get-login-password --region $(AWS_REGION) | \
@@ -52,3 +56,19 @@ build-ecr:
 		--push .
 
 push-ecr: login-ecr build-ecr
+
+
+# --------- CONNECT TO AWS EC2 AND PULL LATEST IMAGE (DEPLOY) ----------
+
+# FIX
+login-ec2-and-pull:
+	yes | aws ec2-instance-connect ssh \
+		--region $(AWS_REGION) \
+		--instance-id $(EC2_INSTANCE_ID) \
+		--os-user $(EC2_USER) \
+		-- \
+		-o StrictHostKeyChecking=no \
+		-o UserKnownHostsFile=/dev/null \
+		"pwd && ls"
+
+full-deploy-prod: push-ecr login-ec2-and-pull
