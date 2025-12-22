@@ -6,6 +6,10 @@ from core.workflow import app as graph_app
 from dotenv import load_dotenv
 import logging
 import traceback
+from datetime import datetime, timezone
+import os, json, time, uuid
+from core.db_logging import log_event
+from zoneinfo import ZoneInfo
 load_dotenv()
 
 logger = logging.getLogger("uvicorn.error")
@@ -71,6 +75,20 @@ def return_advice_recommendation(payload: RefiAdviceRequest):
             monthly_savings=result.get("monthly_savings", None),
             break_even=result.get("break_even", None)
             )
+        
+        print("POST Request Successful!")
+        
+        # Log to DynamoDB
+        try:
+            log_event(interest_rate=payload.interest_rate,
+                  current_payment=payload.current_payment,
+                  mortgage_balance=payload.mortgage_balance,
+                  timestamp=datetime.now(ZoneInfo("US/Eastern")).isoformat(),
+                  primary_key=str(uuid.uuid4()))
+            
+        except Exception:
+            logger.exception("DynamoDB logging failed.")
+
         return resp
     except Exception as e:
         #raise HTTPException(status_code=500, detail=f"Advisor failed: {e}")

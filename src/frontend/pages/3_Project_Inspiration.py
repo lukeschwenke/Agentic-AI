@@ -34,4 +34,4 @@ st.markdown("""To make refinancing in the future even easier for ourselves, I cr
             """)
 
 IMG_PATH_EMAIL = FRONTEND_DIR / "images" / "refi_daily_email.png"
-st.image(str(IMG_PATH_EMAIL), use_container_width=True)
+st.image(str(IMG_PATH_EMAIL), width="stretch")

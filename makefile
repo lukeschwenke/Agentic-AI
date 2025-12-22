@@ -28,6 +28,10 @@ run:
 		-p $(PORT):8000 \
 		$(IMAGE_NAME)
 
+# Add this if testing DB logging locally
+# -e AWS_PROFILE=default \
+# -v $(HOME)/.aws:/root/.aws \
+
 ui:
 	poetry run streamlit run src/frontend/Agentic_Refinance_Tool.py
 

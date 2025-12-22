@@ -13,7 +13,7 @@ st.markdown("##### Hello! Use this Agentic AI powered refinance tool to determin
 FRONTEND_DIR = Path(__file__).resolve().parents[0]
 IMG_PATH = FRONTEND_DIR / "images" / "landing_page_v1.png"
 #st.set_page_config(layout="wide")
-st.image(str(IMG_PATH), use_container_width=True)
+st.image(str(IMG_PATH), width="stretch")
 
 # Ensure there is a place to store the last response
 if "resp" not in st.session_state:

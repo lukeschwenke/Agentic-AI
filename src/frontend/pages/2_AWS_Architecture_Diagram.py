@@ -8,4 +8,4 @@ IMG_PATH = FRONTEND_DIR / "images" / "arch_diagram_v2.png"
 
 st.set_page_config(layout="wide")
 
-st.image(str(IMG_PATH), use_container_width=True)
+st.image(str(IMG_PATH), width="stretch")
